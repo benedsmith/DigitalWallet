@@ -1,0 +1,18 @@
+Create a wallet:
+
+curl -X POST -H "Content-Type: application/json" -d '{"balance": "100", "max_deposit": "10000.00", "max_withdraw": "5000.00", "min_transfer": "10.00"}' http://localhost:8080/wallets/new
+
+Transaction requests: REPLACE WALLETID WITH YOUR NEWLY CREATED WALLET'S ID
+
+curl -X POST -H "Content-Type: application/json" -d '{"amount": "100", "transactionType": "CREDIT", "walletId": "ab70c7c0-ebee-4027-ad40-68131d316a96"}' http://localhost:8080/transactions/new
+
+curl -X POST -H "Content-Type: application/json" -d '{"amount": "10", "transactionType": "CREDIT", "walletId": "ab70c7c0-ebee-4027-ad40-68131d316a96"}' http://localhost:8080/transactions/new
+
+curl -X POST -H "Content-Type: application/json" -d '{"amount": "150", "transactionType": "CREDIT", "walletId": "2293174f-3a97-4d48-847d-7c704c0a5b8f"}' http://localhost:8080/transactions/new
+
+curl -X POST -H "Content-Type: application/json" -d '{"amount": "99", "transactionType": "CREDIT", "walletId": "2293174f-3a97-4d48-847d-7c704c0a5b8f"}' http://localhost:8080/transactions/new
+
+Get all transactions for wallet:
+
+curl -X GET -H "Content-Type: application/json" http://localhost:8080/transactions/ab70c7c0-ebee-4027-ad40-68131d316a96
+
