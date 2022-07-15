@@ -17,7 +17,7 @@ public class TransactionController {
     }
 
     @PostMapping("/transactions/new")
-    String newTransaction(@RequestBody TransactionRequestBody requestBody) {
+    public String newTransaction(@RequestBody TransactionRequestBody requestBody) {
         return transactionService.newTransaction(
                 requestBody.getWalletId(),
                 requestBody.getTransactionType(),
