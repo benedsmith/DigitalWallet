@@ -1,5 +1,5 @@
 # DigitalWallet
-A simple digital wallet implementation using Spring Boot, H2, Jackson, JPA
+A simple digital wallet implementation using Spring Boot, H2, Jackson, JPA. Tested with JUnit, Mockito
 
 
 ## Usage
