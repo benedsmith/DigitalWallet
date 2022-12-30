@@ -28,7 +28,4 @@ public class Wallet {
     @JsonIgnore
     @Column(name="max_withdraw")
     private BigDecimal maxWithdraw;
-
-    @Setter
-    private BigDecimal balance;
 }

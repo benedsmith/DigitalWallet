@@ -11,11 +11,6 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 public class WalletRequestBody implements Serializable {
-
-    @NotNull
-    @JsonProperty("balance")
-    private BigDecimal balance;
-
     @NotNull
     @JsonProperty("max_deposit")
     private BigDecimal maxDeposit;

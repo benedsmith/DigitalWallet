@@ -1,20 +1,21 @@
 package com.benedsmith.DigitalWallet.service;
 
 import com.benedsmith.DigitalWallet.entity.Transaction;
+import com.benedsmith.DigitalWallet.entity.Wallet;
 import com.benedsmith.DigitalWallet.enums.TransactionType;
 import com.benedsmith.DigitalWallet.repository.TransactionRepository;
+import com.benedsmith.DigitalWallet.repository.WalletRepository;
 import com.benedsmith.DigitalWallet.service.impl.TransactionServiceImpl;
 import com.benedsmith.DigitalWallet.service.impl.WalletServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,50 +31,48 @@ public class TransactionServiceImplTest {
     @Mock
     WalletServiceImpl walletService;
 
+    @Mock
+    WalletRepository walletRepository;
+
     @BeforeEach
     void setUp() {
         transactionRepository = Mockito.mock(TransactionRepository.class);
         walletService = Mockito.mock(WalletServiceImpl.class);
+        walletRepository = Mockito.mock(WalletRepository.class);
 
-        transactionService = new TransactionServiceImpl(transactionRepository, walletService);
-    }
-
-    @Test
-    public void newTransactionFailureTest() {
-        when(walletService.updateBalance(any(), any(), any())).thenReturn(false);
-
-        String walletId = "anything";
-        TransactionType transactionType = TransactionType.CREDIT;
-        BigDecimal amount = new BigDecimal(1);
-
-        assertEquals("Transaction failed",
-                transactionService.newTransaction(walletId, transactionType, amount));
+        transactionService = new TransactionServiceImpl(transactionRepository, walletRepository);
     }
 
     @Test
     public void newTransactionSuccessTest() {
-        when(walletService.updateBalance(any(), any(), any())).thenReturn(true);
 
-        String walletId = "anything";
-        TransactionType transactionType = TransactionType.CREDIT;
-        BigDecimal amount = new BigDecimal(1);
+        Wallet wallet = Wallet.builder()
+                .walletId("456")
+                .maxDeposit(BigDecimal.valueOf(999))
+                .maxWithdraw(BigDecimal.valueOf(999))
+                .minTransfer(BigDecimal.valueOf(1))
+                .build();
 
-        assertEquals("Successful transaction",
-                transactionService.newTransaction(walletId, transactionType, amount));
-    }
+        when(walletRepository.findById(any(String.class))).thenReturn(Optional.ofNullable(wallet));
 
+        Transaction expectedTransaction = Transaction.builder()
+                .amount(BigDecimal.TEN)
+                .walletId("walletId")
+                .type(TransactionType.CREDIT)
+                .build();
 
-    @Test
-    public void getTransactionHistorySuccessTest() {
-        Transaction transaction1 = new Transaction("anyId", "anyWalletId", TransactionType.CREDIT, new BigDecimal(1), LocalDateTime.now());
-        Transaction transaction2 = new Transaction("anyId", "anyWalletId", TransactionType.CREDIT, new BigDecimal(2), LocalDateTime.now());
+        ArgumentCaptor<Transaction> transactionArgumentCaptor = ArgumentCaptor.forClass(Transaction.class);
 
-        List<Transaction> transactions = new ArrayList<>();
-        transactions.add(transaction1);
-        transactions.add(transaction2);
+        Transaction transactionResponse = transactionService.newTransaction("walletId", TransactionType.CREDIT, BigDecimal.TEN);
 
-        when(transactionRepository.findAllByWalletId("anyWalletId")).thenReturn(transactions);
+        Mockito.verify(transactionRepository, Mockito.times(1)).saveAndFlush(any(Transaction.class));
+        Mockito.verify(transactionRepository).saveAndFlush(transactionArgumentCaptor.capture());
 
-        assertEquals(transactionService.getTransactionHistory("anyWalletId"), transactions);
+        Transaction capturedTransaction = transactionArgumentCaptor.getValue();
+
+        assertEquals(expectedTransaction.getWalletId(), capturedTransaction.getWalletId());
+        assertEquals(expectedTransaction.getAmount(), capturedTransaction.getAmount());
+        assertEquals(expectedTransaction.getType(), capturedTransaction.getType());
+
     }
 }
